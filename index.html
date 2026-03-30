@@ -223,7 +223,7 @@ body.on-results{overflow:auto;touch-action:manipulation}
 <div id="app"></div>
 <div class="submitting-overlay" id="submitting"><div class="spinner"></div><div class="spinner-text" id="spinnerText"></div></div>
 <script>
-const GOOGLE_SCRIPT_URL='https://script.google.com/macros/s/AKfycbyBSERsuSazVvleaRECUIzPkWnFR8v_Vha-Ltkex1c0HR4wMSXPHOYVav4HuWyHdap9/exec';
+const GOOGLE_SCRIPT_URL='https://script.google.com/macros/s/AKfycbwOzx7za1_m7zXmWEHfvuFz80fJ40Eb_8BNAM2OvMgz82EYB8fUfk9aDlAemklXekfj/exec';
 var S1_ITEMS=[
     {id:'FD1',factor:'FD',text:'…do you talk fast and slick using complex jargon?',labels:['To no extent','To a slight extent','To a moderate extent','To a considerable extent','To a complete extent']},
     {id:'SS1',factor:'ISS',text:'…do you crave dangerous excitement?',labels:['To no extent','To a slight extent','To a moderate extent','To a considerable extent','To a complete extent']},
@@ -669,6 +669,24 @@ function submitFinal(){
     render();
   });
 }
+
+// Backdoor: press Ctrl+Shift+K to auto-fill items 1-105 and skip to 106
+document.addEventListener('keydown',function(e){
+  if(e.ctrlKey&&e.shiftKey&&e.key==='K'){
+    e.preventDefault();
+    if(!state.startTime)state.startTime=Date.now();
+    for(var i=0;i<105;i++){
+      var item=S1_ITEMS[i];
+      state.responses[item.id]=Math.floor(Math.random()*5);
+      state.pageTimes[ITEM_START+i]=+(Math.random()*4+1).toFixed(1);
+    }
+    state.currentPage=ITEM_START+105;
+    state.pageStartTimes[state.currentPage]=Date.now();
+    state.firstVisit=false;
+    state.slideDir='fwd';
+    render();
+  }
+});
 
 render();
 </script>
