@@ -6,26 +6,27 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Self-Discovery Index</title>
+<title>Prototypical Personality Scale</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2'/%3E%3Crect x='9' y='3' width='6' height='4' rx='1'/%3E%3C/svg%3E">
 
 <!-- Social Media Preview Meta Tags -->
-<meta name="description" content="Explore your personality across 6 dimensions. A free, anonymous assessment — ~10 minutes.">
+<meta name="description" content="Not your ordinary personality test.">
 
 <!-- Open Graph (Facebook, Messenger, Reddit, LinkedIn, Discord, etc.) -->
 <meta property="og:type" content="website">
-<meta property="og:title" content="Self-Discovery Index — Personality Assessment">
-<meta property="og:description" content="Explore your personality across 6 dimensions. A free, anonymous assessment — ~10 minutes.">
+<meta property="og:title" content="Prototypical Personality Scale — Personality Assessment">
+<meta property="og:description" content="Not your ordinary personality test.">
 <!-- IMPORTANT: Replace YOUR-USERNAME and YOUR-REPO below with your actual GitHub Pages URL -->
 <meta property="og:url" content="https://PsychometricLab.github.io/PPS/">
 <meta property="og:image" content="https://PsychometricLab.github.io/PPS/og-preview.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Self-Discovery Index — Personality Assessment">
+<meta property="og:image:alt" content="Prototypical Personality Scale — Personality Assessment">
 
 <!-- Twitter / X Card -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Self-Discovery Index — Personality Assessment">
-<meta name="twitter:description" content="Discover your personality traits across 6 dimensions. Free & anonymous.">
+<meta name="twitter:title" content="Prototypical Personality Scale — Personality Assessment">
+<meta name="twitter:description" content="Not your ordinary personality test.">
 <meta name="twitter:image" content="https://PsychometricLab.github.io/PPS/og-preview.png">
 <script>
 (function(){var v='v='+Math.floor(Date.now()/60000);if(location.search.indexOf(v)===-1){location.replace(location.pathname+'?'+v)}})();
@@ -397,6 +398,8 @@ var RESULTS_PAGE=DEMOGRAPHICS_PAGE+1;
 var state={currentPage:0,responses:{},startTime:null,pageStartTimes:[],pageTimes:[],respondentId:'R'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),ipData:{},firstVisit:true,slideDir:'fwd',s1Submitted:false};
 
 var VPN_KEYWORDS=['vpn','nord','express','surfshark','cyberghost','private internet','mullvad','proton','pia ','windscribe','tunnelbear','ivpn','hide.me','hotspot shield','ipvanish','purevpn','torguard','astrill','vypr','zenmate','strongvpn','datacenter','hosting','cloud','server','hetzner','digitalocean','ovh','amazon','aws','linode','vultr','choopa','m247','datacamp','psychz','leaseweb','quadranet','cogent','zscaler'];
+var SUBMIT_SECRET='pps_8Kv3nQ7xW2mP';
+function generateToken(rid){var s=SUBMIT_SECRET+':'+rid;var h=0;for(var i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0}return 'tk_'+Math.abs(h).toString(36)}
 (function(){
   fetch('https://ipapi.co/json/')
     .then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})
@@ -421,7 +424,7 @@ function render(){
 }
 
 function renderWelcome(){
-  return '<div class="hero"><div class="hero-badge">Personality</div><h1>Prototypical Personality Scale</h1><p class="hero-sub">This assessment explores <strong>6</strong> dimensions of personality<br>that standard tests often overlook.</p><p class="hero-sub" style="margin-top:0.75rem"><strong>This test is free and anonymous.</strong></p><p class="hero-sub" style="margin-top:0.75rem">Answer based on how you have been most of the time, in most situations, over the past 5 years.</p><p class="hero-sub" style="margin-top:0.75rem">Be honest, take your time, and have fun.</p><div class="hero-meta"><div class="hero-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>99 questions</div><div class="hero-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>~10 minutes</div><div class="hero-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>Anonymous</div></div><button class="btn-hero" id="btnStart">Begin assessment</button></div>';
+  return '<div class="hero"><div class="hero-badge">Personality</div><h1>Prototypical Personality Scale</h1><p class="hero-sub">Measures <strong>six personality dimensions</strong><br> that other tests often overlook.</p><p class="hero-sub" style="margin-top:0.75rem">Answer based on how you have been most of the time, in most situations, over the past 5 years.</p><p class="hero-sub" style="margin-top:0.75rem">Be honest, take your time, and have fun.</p><div class="hero-meta"><div class="hero-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>99 questions</div><div class="hero-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>~12 minutes</div><div class="hero-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>Free results</div></div><button class="btn-hero" id="btnStart">Begin assessment</button></div>';
 }
 
 function renderExplainer(){
@@ -624,7 +627,7 @@ function submitSection1(){
   var totalTime=Math.round((Date.now()-state.startTime)/100)/10;
   var itemTimes={};
   S1_ITEMS.forEach(function(item,i){itemTimes[item.id]=state.pageTimes[ITEM_START+i]||0});
-  var payload={respondent_id:state.respondentId,section:'partial',total_time_seconds:totalTime,ip_address:state.ipData.ip||'',ip_country:state.ipData.country||'',ip_city:state.ipData.city||'',isp:state.ipData.isp||'',is_vpn_or_proxy:state.ipData.is_vpn?'YES':'NO',responses:state.responses,item_times:itemTimes};
+  var payload={respondent_id:state.respondentId,section:'partial',total_time_seconds:totalTime,ip_address:state.ipData.ip||'',ip_country:state.ipData.country||'',ip_city:state.ipData.city||'',isp:state.ipData.isp||'',is_vpn_or_proxy:state.ipData.is_vpn?'YES':'NO',responses:state.responses,item_times:itemTimes,auth_token:generateToken(state.respondentId)};
   submitToSheet(payload,function(){
     overlay.classList.remove('visible');
     state.currentPage=LIKERT_EXPLAINER;
@@ -662,7 +665,7 @@ function submitFinal(){
   var itemTimes={};
   S1_ITEMS.forEach(function(item,i){itemTimes[item.id]=state.pageTimes[ITEM_START+i]||0});
   S2_ITEMS.forEach(function(item,i){itemTimes[item.id]=state.pageTimes[S2_START+i]||0});
-  var payload={respondent_id:state.respondentId,section:'complete',total_time_seconds:totalTime,ip_address:state.ipData.ip||'',ip_country:state.ipData.country||'',ip_city:state.ipData.city||'',isp:state.ipData.isp||'',is_vpn_or_proxy:state.ipData.is_vpn?'YES':'NO',responses:state.responses,item_times:itemTimes,demo_age:parseInt(age),demo_country:country,demo_feedback:feedback};
+  var payload={respondent_id:state.respondentId,section:'complete',total_time_seconds:totalTime,ip_address:state.ipData.ip||'',ip_country:state.ipData.country||'',ip_city:state.ipData.city||'',isp:state.ipData.isp||'',is_vpn_or_proxy:state.ipData.is_vpn?'YES':'NO',responses:state.responses,item_times:itemTimes,demo_age:parseInt(age),demo_country:country,demo_feedback:feedback,auth_token:generateToken(state.respondentId)};
   submitToSheet(payload,function(){
     overlay.classList.remove('visible');
     state.currentPage=RESULTS_PAGE;
@@ -670,23 +673,7 @@ function submitFinal(){
   });
 }
 
-// Backdoor: press Ctrl+Shift+K to auto-fill items 1-105 and skip to 106
-document.addEventListener('keydown',function(e){
-  if(e.ctrlKey&&e.shiftKey&&e.key==='K'){
-    e.preventDefault();
-    if(!state.startTime)state.startTime=Date.now();
-    for(var i=0;i<105;i++){
-      var item=S1_ITEMS[i];
-      state.responses[item.id]=Math.floor(Math.random()*5);
-      state.pageTimes[ITEM_START+i]=+(Math.random()*4+1).toFixed(1);
-    }
-    state.currentPage=ITEM_START+105;
-    state.pageStartTimes[state.currentPage]=Date.now();
-    state.firstVisit=false;
-    state.slideDir='fwd';
-    render();
-  }
-});
+
 
 render();
 </script>
