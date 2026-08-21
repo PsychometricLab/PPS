@@ -209,6 +209,31 @@ h1.title .l2-plain{color:var(--text);font-style:normal}
 .intro-list li:last-child{margin-bottom:0}
 .intro-list li::before{content:'';position:absolute;left:2px;top:.6em;width:9px;height:1px;background:var(--accent)}
 
+/* ---- Explainer modal: floats over the results until dismissed ---- */
+.explainer-open{overflow:hidden}
+.results-veiled{filter:blur(3px) saturate(.7);opacity:.35;pointer-events:none;user-select:none}
+.explainer-overlay{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;
+  padding:28px 20px;background:rgba(8,8,10,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  overflow-y:auto;animation:veilIn .45s var(--ease) both}
+.explainer-card{position:relative;width:100%;max-width:560px;margin:auto;
+  background:var(--bg);border:1px solid var(--line);border-radius:6px;
+  padding:38px 34px 30px;box-shadow:0 28px 70px rgba(0,0,0,.6);
+  animation:cardIn .55s var(--ease) both}
+.explainer-card h2{font-family:var(--serif);font-weight:250;font-style:italic;
+  font-size:clamp(23px,4.2vw,31px);line-height:1.22;letter-spacing:-.012em;color:var(--text);margin:0}
+.explainer-card .results-intro{margin-top:16px}
+.explainer-card .intro-list{margin-top:16px}
+.explainer-actions{margin-top:28px;padding-top:22px;border-top:1px solid var(--line);display:flex;justify-content:center}
+@keyframes veilIn{from{opacity:0}to{opacity:1}}
+@keyframes cardIn{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:none}}
+.explainer-overlay.closing{animation:veilOut .3s var(--ease) both}
+@keyframes veilOut{to{opacity:0}}
+@media (max-width:640px){.explainer-card{padding:30px 22px 24px}}
+@media (prefers-reduced-motion:reduce){
+  .explainer-overlay,.explainer-card,.explainer-overlay.closing{animation:none}
+  .results-veiled{filter:none;opacity:.4}
+}
+
 .factor-block{
   margin-top:26px;padding:28px 26px 26px;
   background:linear-gradient(180deg,var(--surface),rgba(23,26,35,.2));
@@ -396,6 +421,7 @@ function render(){
   else if(s.type==='pps')html=renderPPSItem(s);
   else if(s.type==='demographics')html=renderDemographics();
   else if(s.type==='results')html=renderResults();
+  document.body.classList.remove('explainer-open'); // never leave scroll locked across a re-render
   app.innerHTML=html;attachListeners();
   if(s.type==='pps'){requestAnimationFrame(sizeOptions);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){if(SCREENS[state.currentPage]&&SCREENS[state.currentPage].type==='pps')sizeOptions();});}
   if(s.type==='results'){clearProgress();}
@@ -696,15 +722,7 @@ function renderResults(){
       +'<div class="tscore-line">T-score <b>'+t+'</b> <span class="band-tag '+band.cls+'">'+band.label+'</span></div>'
       +'</div>';
   }
-  var html='<section class="screen results-screen"><div class="rwrap">';
-  html+='<h2 class="results-title serif nowrap-title"><em>What even is Psychopathy anyway?</em></h2>';
-  html+='<p class="results-intro">A psychopathic personality is made up of three broad personality traits:</p>';
-  html+='<ul class="intro-list">'
-    +'<li>A Charming and Manipulative Interpersonal Style</li>'
-    +'<li>A Deficient Affective Experience</li>'
-    +'<li>An Impulsive, Irresponsible, and Aimless Lifestyle</li>'
-    +'</ul>';
-  html+='<p class="results-intro">Each of these traits exists on its own spectrum. These spectrums are only modestly correlated; you could be high on one spectrum and low on another. The prototypical psychopathic personality is high on all three.</p>';
+  var html='<section class="screen results-screen"><div class="rwrap results-veiled" id="resultsBody">';
   html+='<h2 class="results-title serif">Your results</h2>';
   factors.forEach(function(f){
     var d=DIMS[f.key];var score=calcRawFactor(f.key);var arr=DIST[f.key];
@@ -744,7 +762,21 @@ function renderResults(){
     +'<p>Because equivalent raw scores on all three factors represent substantially different deviations from each factors mean, the Global score standardizes each trait independently, averages the three T-scores, then rescales that average by its own empirical SD in the validation sample. By calculating the global T-score this way rather than from summed raw scores, it ensures that each factor contributes equally to the composite T-score.</p>'
     +'<p>This is a self-report research measure, not a clinical assessment or a diagnosis.</p>'
     +'</div>';
-  html+='</div></section>';
+  html+='</div>';
+  // Explainer modal, floating above the report until dismissed.
+  html+='<div class="explainer-overlay" id="explainerOverlay" role="dialog" aria-modal="true" aria-labelledby="explainerTitle">'
+    +'<div class="explainer-card">'
+    +'<h2 id="explainerTitle">What even is Psychopathy anyway?</h2>'
+    +'<p class="results-intro">A psychopathic personality is made up of three broad personality traits:</p>'
+    +'<ul class="intro-list">'
+    +'<li>A Charming and Manipulative Interpersonal Style</li>'
+    +'<li>A Deficient Affective Experience</li>'
+    +'<li>An Impulsive, Irresponsible, and Aimless Lifestyle</li>'
+    +'</ul>'
+    +'<p class="results-intro">Each of these traits exists on its own spectrum. These spectrums are only modestly correlated; you could be high on one spectrum and low on another. The prototypical psychopathic personality is high on all three.</p>'
+    +'<div class="explainer-actions"><button class="next" type="button" id="btnSeeResults">See your results</button></div>'
+    +'</div></div>';
+  html+='</section>';
   return html;
 }
 
@@ -778,7 +810,25 @@ function goBack(){
   render();
 }
 
+function closeExplainer(){
+  var ov=document.getElementById('explainerOverlay');
+  var body=document.getElementById('resultsBody');
+  if(body)body.classList.remove('results-veiled');
+  document.body.classList.remove('explainer-open');
+  if(ov){ov.classList.add('closing');setTimeout(function(){if(ov.parentNode)ov.parentNode.removeChild(ov);},300);}
+  window.scrollTo(0,0);
+}
+
 function attachListeners(){
+  var bsr=document.getElementById('btnSeeResults');
+  if(bsr){
+    document.body.classList.add('explainer-open');
+    bsr.addEventListener('click',closeExplainer);
+    document.addEventListener('keydown',function esc(ev){
+      if(ev.key==='Escape'){closeExplainer();document.removeEventListener('keydown',esc);}
+    });
+    setTimeout(function(){try{bsr.focus();}catch(e){}},400);
+  }
   var bs=document.getElementById('btnStart');
   if(bs)bs.addEventListener('click',function(){goNext();});
   var bn=document.getElementById('btnNext');
