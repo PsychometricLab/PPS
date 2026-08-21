@@ -203,6 +203,10 @@ h1.title .l2-plain{color:var(--text);font-style:normal}
 .results-title.nowrap-title{white-space:nowrap;font-size:min(calc((100vw - 60px) / 14), 49px)}
 .results-title.nowrap-title em{font-style:italic}
 .rwrap>.results-title:first-child{margin-top:0}
+/* Title and the minimized-explainer pill share a baseline row: the pill's
+   bottom edge sits level with the bottom of "Your results". */
+.results-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px}
+.results-head>.results-title{margin-top:0}
 .results-intro{margin-top:18px;font-family:var(--sans);font-size:15px;font-weight:400;line-height:1.68;color:var(--muted-2);text-wrap:pretty}
 .intro-list{list-style:none;margin:18px 0 0;padding:0}
 .intro-list li{position:relative;padding-left:24px;margin-bottom:10px;font-family:var(--sans);font-size:15px;line-height:1.5;color:var(--text);text-wrap:balance}
@@ -229,6 +233,40 @@ h1.title .l2-plain{color:var(--text);font-style:normal}
 .explainer-overlay.closing{animation:veilOut .3s var(--ease) both}
 @keyframes veilOut{to{opacity:0}}
 @media (max-width:640px){.explainer-card{padding:30px 22px 24px}}
+
+/* ---- Minimized state: the modal collapses into a pill above the report ---- */
+/* The title's line box extends ~.15em below its baseline (descender space at
+   line-height:1), so the slot carries matching padding to lift the pill onto
+   the visual bottom of "Your results" rather than the bottom of its box. */
+.explainer-slot{display:flex;justify-content:flex-end;flex:none;line-height:1;
+  font-size:clamp(34px,6.4vw,56px);padding-bottom:.15em}
+.explainer-pill{white-space:nowrap;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 15px 9px 13px;border-radius:999px;cursor:pointer;
+  background:linear-gradient(180deg,var(--surface-2),var(--surface));
+  border:1px solid var(--line-2);color:var(--muted-2);
+  font-family:var(--sans);font-size:12.5px;font-weight:500;line-height:1;
+  box-shadow:0 16px 34px -20px rgba(0,0,0,1);
+  transform-origin:100% 50%;
+  transition:opacity .34s var(--ease),transform .4s var(--ease),color .25s,border-color .25s,background .25s}
+.explainer-pill::before{content:'';flex:none;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.explainer-pill:hover{color:var(--text);border-color:rgba(255,255,255,.3);background:var(--surface-2)}
+.explainer-pill.stowed{opacity:0;transform:scale(.82);pointer-events:none}
+/* A couple of soft pulses once the card lands, so the handoff reads as one motion. */
+@keyframes pillLand{
+  0%{box-shadow:0 16px 34px -20px rgba(0,0,0,1),0 0 0 0 rgba(198,85,63,.5)}
+  60%{box-shadow:0 16px 34px -20px rgba(0,0,0,1),0 0 0 11px rgba(198,85,63,0)}
+  100%{box-shadow:0 16px 34px -20px rgba(0,0,0,1),0 0 0 0 rgba(198,85,63,0)}}
+.explainer-pill.landing{animation:pillLand 1.1s var(--ease) 2}
+@media (max-width:640px){
+  .explainer-pill{font-size:12px;padding:8px 13px 8px 11px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .explainer-pill{transition:opacity .2s linear}
+  .explainer-pill.stowed{transform:none}
+  .explainer-pill.landing{animation:none}
+}
 @media (prefers-reduced-motion:reduce){
   .explainer-overlay,.explainer-card,.explainer-overlay.closing{animation:none}
   .results-veiled{filter:none;opacity:.4}
@@ -586,7 +624,7 @@ var TOTAL_MAX=96;
 var FACTOR_ORDER=['INT','AFF','LIF'];
 var DIMS={
   INT:{short:'Interpersonal',name:'Charming and Manipulative Interpersonal Style',desc:'Reflects an ability to use charm, confidence, and deceit to influence and manipulate. High scorers are skilled liars with the \u2018gift-of-the-gab\u2019, and often present as endearing, charismatic, and bold. For example, it\u2019s not uncommon for those with extreme elevations on this trait to have been hired for every job they ever interviewed for.',note:'If an individual scores highly on the other two traits, a high score in this domain can camouflage those traits, creating an outward appearance of normalcy.'},
-  AFF:{short:'Affective',name:'Deficient Affective Experience',desc:'Reflects a poverty of social-emotional experience. High scorers lack empathy, guilt and remorse, and are often unable to form lasting emotional bonds with others. As a result, they tend to experience their friendships in a shallow or detached way, and have a tendency towards rational, utilitarian, and \u201cmeans-to-an-end\u201d styles of thinking.'},
+  AFF:{short:'Affective',name:'Deficient Affective Experience',desc:'Reflects a poverty of social-emotional experience. High scorers lack empathy, guilt and remorse, and are often unable to form lasting emotional bonds with others. As a result, they tend to experience their friendships in a shallow, detached way, and have a tendency towards rational, utilitarian, and \u201cmeans-to-an-end\u201d styles of thinking.'},
   LIF:{short:'Lifestyle',name:'Impulsive, Irresponsible, and Aimless Lifestyle',desc:'Reflects a dysregulated reward system. High scorers tend to be strongly motivated by immediate reward and short-term gratification. They are prone to boredom with a need for constant action, and tend to \u201clive life in the fast-lane\u201d. As such, their internal motivation to pull their own weight, maintain effort towards long-term goals, or follow through on their promises and obligations is lacking.'}
 };
 
@@ -723,7 +761,13 @@ function renderResults(){
       +'</div>';
   }
   var html='<section class="screen results-screen"><div class="rwrap results-veiled" id="resultsBody">';
+  html+='<div class="results-head">';
   html+='<h2 class="results-title serif">Your results</h2>';
+  // The pill the modal collapses into — in flow, so it scrolls with the report.
+  html+='<div class="explainer-slot">'
+    +'<button type="button" class="explainer-pill stowed" id="explainerPill" aria-expanded="true" aria-controls="explainerOverlay">What is psychopathy?</button>'
+    +'</div>';
+  html+='</div>';
   factors.forEach(function(f){
     var d=DIMS[f.key];var score=calcRawFactor(f.key);var arr=DIST[f.key];
     var bins=binCounts(arr,f.edges);
@@ -750,6 +794,7 @@ function renderResults(){
   var gE=edgesFromRange(gMin,gMax,6);
   html+='<section class="total-block">';
   html+='<div class="factor-title-row"><h3 class="factor-title serif">Global Psychopathy</h3></div>';
+  html+='<div class="factor-desc">Reflects the degree to which an individual\u2019s personality resembles the psychopathic prototype overall, when the three traits that define it are considered together.</div>';
   html+=statRow(pT,tT,bandT);
   html+='<div class="chart-wrap">';
   html+=buildChartSVG({bins:binCounts(DIST.GLOBAL,gE),edges:gE,minX:gMin,maxX:gMax,userScore:tT,rawData:DIST.GLOBAL,std:COMPOSITE_SD,
@@ -767,13 +812,13 @@ function renderResults(){
   html+='<div class="explainer-overlay" id="explainerOverlay" role="dialog" aria-modal="true" aria-labelledby="explainerTitle">'
     +'<div class="explainer-card">'
     +'<h2 id="explainerTitle">What even is Psychopathy anyway?</h2>'
-    +'<p class="results-intro">A psychopathic personality is made up of three broad personality traits:</p>'
+    +'<p class="results-intro">Psychopathy is a personality construct. It describes a personality that emerges when three distinct characteristics occur together in the same person:</p>'
     +'<ul class="intro-list">'
     +'<li>A Charming and Manipulative Interpersonal Style</li>'
     +'<li>A Deficient Affective Experience</li>'
     +'<li>An Impulsive, Irresponsible, and Aimless Lifestyle</li>'
     +'</ul>'
-    +'<p class="results-intro">Each of these traits exists on its own spectrum. These spectrums are only modestly correlated; you could be high on one spectrum and low on another. The prototypical psychopathic personality is high on all three.</p>'
+    +'<p class="results-intro">Each of these traits exists on its own spectrum. The three spectrums are only modestly correlated, meaning that you can be high on one while being low on another. The prototypical psychopathic personality is characterized by high levels of all three.</p>'
     +'<div class="explainer-actions"><button class="next" type="button" id="btnSeeResults">See your results</button></div>'
     +'</div></div>';
   html+='</section>';
@@ -810,22 +855,129 @@ function goBack(){
   render();
 }
 
-function closeExplainer(){
+// ---- Explainer: minimises into the top-right pill rather than closing outright ----
+var explainerSeen=false;
+
+function prefersReducedMotion(){
+  try{return window.matchMedia('(prefers-reduced-motion:reduce)').matches;}catch(e){return false;}
+}
+
+// Measure the pill at its natural size even while it is stowed (scaled down),
+// so the card lands exactly on it instead of on a shrunken ghost of it.
+function pillRect(pill){
+  if(!pill.classList.contains('stowed'))return pill.getBoundingClientRect();
+  var prev=pill.style.transition;
+  pill.style.transition='none';
+  pill.classList.remove('stowed');
+  var r=pill.getBoundingClientRect();
+  pill.classList.add('stowed');
+  void pill.offsetWidth;
+  pill.style.transition=prev;
+  return r;
+}
+
+// Transform that maps the card's current box onto the pill's box.
+function cardToPill(cardRect,pRect){
+  var sx=pRect.width/cardRect.width,sy=pRect.height/cardRect.height;
+  var dx=(pRect.left+pRect.width/2)-(cardRect.left+cardRect.width/2);
+  var dy=(pRect.top+pRect.height/2)-(cardRect.top+cardRect.height/2);
+  return 'translate('+Math.round(dx)+'px,'+Math.round(dy)+'px) scale('+sx.toFixed(4)+','+sy.toFixed(4)+')';
+}
+
+function minimizeExplainer(){
   var ov=document.getElementById('explainerOverlay');
+  if(!ov||ov.dataset.busy==='1'||ov.dataset.state==='min')return;
+  var card=ov.querySelector('.explainer-card');
+  var pill=document.getElementById('explainerPill');
   var body=document.getElementById('resultsBody');
+  ov.dataset.state='min';
   if(body)body.classList.remove('results-veiled');
   document.body.classList.remove('explainer-open');
-  if(ov){ov.classList.add('closing');setTimeout(function(){if(ov.parentNode)ov.parentNode.removeChild(ov);},300);}
-  window.scrollTo(0,0);
+  if(pill)pill.setAttribute('aria-expanded','false');
+  if(!explainerSeen){explainerSeen=true;window.scrollTo(0,0);}
+  if(!card||!pill||prefersReducedMotion()){
+    ov.style.display='none';
+    if(pill)pill.classList.remove('stowed');
+    return;
+  }
+  ov.dataset.busy='1';
+  var pr=pillRect(pill),cr=card.getBoundingClientRect();
+  card.style.animation='none';ov.style.animation='none';
+  card.style.transformOrigin='center center';
+  // Card holds its opacity for the first half of the trip, then dissolves as it
+  // arrives — so the pill is what's left behind rather than a separate event.
+  card.style.transition='transform .74s var(--ease),opacity .44s var(--ease) .3s';
+  ov.style.transition='opacity .5s var(--ease)';
+  void card.offsetWidth;
+  card.style.transform=cardToPill(cr,pr);
+  card.style.opacity='0';
+  ov.style.opacity='0';
+  // Pill is already there, waiting, before the card starts moving.
+  pill.classList.remove('landing');
+  pill.classList.remove('stowed');
+  setTimeout(function(){
+    ov.style.display='none';
+    card.style.transition='';card.style.transform='';card.style.opacity='';card.style.transformOrigin='';
+    ov.style.transition='';ov.style.opacity='';
+    ov.dataset.busy='';
+    void pill.offsetWidth;
+    pill.classList.add('landing');
+  },760);
+}
+
+function restoreExplainer(){
+  var ov=document.getElementById('explainerOverlay');
+  if(!ov||ov.dataset.busy==='1'||ov.dataset.state==='open')return;
+  var card=ov.querySelector('.explainer-card');
+  var pill=document.getElementById('explainerPill');
+  var body=document.getElementById('resultsBody');
+  ov.dataset.state='open';
+  ov.style.display='';
+  if(body)body.classList.add('results-veiled');
+  document.body.classList.add('explainer-open');
+  if(pill){pill.setAttribute('aria-expanded','true');pill.classList.remove('landing');}
+  if(!card||!pill||prefersReducedMotion()){
+    if(pill)pill.classList.add('stowed');
+    return;
+  }
+  ov.dataset.busy='1';
+  var pr=pillRect(pill),cr=card.getBoundingClientRect();
+  card.style.animation='none';ov.style.animation='none';
+  card.style.transformOrigin='center center';
+  card.style.transition='none';ov.style.transition='none';
+  card.style.transform=cardToPill(cr,pr);
+  card.style.opacity='0';
+  ov.style.opacity='0';
+  void card.offsetWidth;
+  pill.classList.add('stowed');
+  card.style.transition='transform .5s var(--ease),opacity .4s var(--ease)';
+  ov.style.transition='opacity .34s var(--ease)';
+  card.style.transform='none';
+  card.style.opacity='1';
+  ov.style.opacity='1';
+  setTimeout(function(){
+    card.style.transition='';card.style.transform='';card.style.opacity='';card.style.transformOrigin='';
+    ov.style.transition='';ov.style.opacity='';
+    ov.dataset.busy='';
+    try{var b=document.getElementById('btnSeeResults');if(b)b.focus();}catch(e){}
+  },520);
 }
 
 function attachListeners(){
   var bsr=document.getElementById('btnSeeResults');
   if(bsr){
+    var ov0=document.getElementById('explainerOverlay');
+    if(ov0)ov0.dataset.state='open';
+    explainerSeen=false;
     document.body.classList.add('explainer-open');
-    bsr.addEventListener('click',closeExplainer);
+    bsr.addEventListener('click',minimizeExplainer);
+    var pill0=document.getElementById('explainerPill');
+    if(pill0)pill0.addEventListener('click',restoreExplainer);
     document.addEventListener('keydown',function esc(ev){
-      if(ev.key==='Escape'){closeExplainer();document.removeEventListener('keydown',esc);}
+      if(ev.key!=='Escape')return;
+      var ov=document.getElementById('explainerOverlay');
+      if(!ov||!ov.parentNode){document.removeEventListener('keydown',esc);return;}
+      if(ov.dataset.state==='open')minimizeExplainer();
     });
     setTimeout(function(){try{bsr.focus();}catch(e){}},400);
   }
